@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediVault | Secure Healthcare</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🏥 MediVault</div>
+        <div class="menu">
+            <span class="status-badge">Secure 256-bit Encryption</span>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <div style="max-width: 500px;">
+            <h1 style="font-size: 3rem; line-height: 1.2;">Your Health Records, <br><span style="color: var(--primary);">Digitally Secured.</span></h1>
+            <p style="margin: 20px 0; color: #4b5563;">Upload prescriptions, test reports, and medical history. Access them anywhere using your Aadhaar authentication.</p>
+        </div>
+
+        <div class="glass-card login-box" id="loginArea">
+            <h3 style="margin-bottom: 20px;">Patient Login</h3>
+            <label>Aadhaar Number</label>
+            <input type="text" id="aadhaarInput" placeholder="XXXX XXXX XXXX" maxlength="12">
+            
+            <div id="otpSection" style="display: none;">
+                <label>Enter OTP (Check Mobile)</label>
+                <input type="text" id="otpInput" placeholder="Enter 6-digit OTP">
+            </div>
+
+            <button class="btn" id="actionBtn" onclick="handleAuth()">Get OTP</button>
+            <p style="text-align: center; margin-top: 15px; font-size: 0.8rem;">
+                Don't share your OTP with anyone.
+            </p>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

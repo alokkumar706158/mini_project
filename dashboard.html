@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>MediVault Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🏥 MediVault</div>
+        <div id="pID" style="font-weight:bold; color:var(--primary)">Loading ID...</div>
+        <button class="btn" onclick="logout()" style="width:auto; padding:5px 15px; background:#ff4757">Logout</button>
+    </nav>
+
+    <div class="hero" style="display:flex; flex-direction:column; align-items:center; padding:20px;">
+        <div class="glass-card" style="width:100%; max-width:500px; padding:20px; margin-bottom:20px;">
+            <h3>Upload New Document</h3>
+            <form id="uploadForm">
+                <input type="file" id="fileInp" required>
+                <input type="text" id="noteInp" placeholder="E.g. X-Ray Report">
+                <button type="submit" id="upBtn" class="btn">Upload</button>
+            </form>
+        </div>
+
+        <div style="width:100%; max-width:700px;">
+            <h3>Your Records</h3>
+            <div id="fileList">
+                <div style="text-align:center; padding:20px;">Loading records, please wait...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const patientId = localStorage.getItem('patientId');
+        if (!patientId) window.location.href = 'index.html';
+        document.getElementById('pID').innerText = "Patient ID: " + patientId;
+
+        // --- FETCH RECORDS FUNCTION ---
+        async function loadRecords() {
+            const listDiv = document.getElementById('fileList');
+            try {
+                const res = await fetch('/api/patient/records/' + patientId);
+                const data = await res.json();
+                
+                if (!data || data.length === 0) {
+                    listDiv.innerHTML = '<div class="glass-card" style="padding:20px; text-align:center;">No records found.</div>';
+                    return;
+                }
+
+                listDiv.innerHTML = data.map(rec => `
+                    <div class="glass-card" style="padding:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border-left:5px solid #059669;">
+                        <div>
+                            <strong>${rec.notes || 'Medical Record'}</strong><br>
+                            <small>${new Date(rec.upload_date).toLocaleDateString()}</small>
+                        </div>
+                        <a href="${rec.file_url}" target="_blank" class="btn" style="width:auto; padding:5px 15px;">View</a>
+                    </div>
+                `).join('');
+            } catch (err) {
+                listDiv.innerHTML = '<div style="color:red; text-align:center;">Failed to connect to server.</div>';
+            }
+        }
+
+        // --- UPLOAD FUNCTION ---
+        document.getElementById('uploadForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('upBtn');
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
+            const fd = new FormData();
+            fd.append('medicalDoc', document.getElementById('fileInp').files[0]);
+            fd.append('patient_id', patientId);
+            fd.append('notes', document.getElementById('noteInp').value);
+
+            try {
+                const res = await fetch('/api/patient/upload', { method: 'POST', body: fd });
+                const out = await res.json();
+                if (out.success) {
+                    alert("Uploaded!");
+                    document.getElementById('uploadForm').reset();
+                    loadRecords();
+                } else { alert("Error: " + out.error); }
+            } catch (e) { alert("Upload failed"); }
+            finally { btn.innerText = "Upload"; btn.disabled = false; }
+        };
+
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+
+        // Is line ko check karein, ye zaroori hai!
+        window.onload = loadRecords;
+    </script>
+</body>
+</html>
